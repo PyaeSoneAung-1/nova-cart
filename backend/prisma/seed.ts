@@ -47,7 +47,7 @@ async function main() {
   console.log("🌱 Seeding NovaCart database...");
 
   // ── Users ──────────────────────────────────────────────────────────────
-  const admin = await prisma.user.upsert({
+  await prisma.user.upsert({
     where: { email: DEMO_ACCOUNTS.admin.email },
     update: {},
     create: {

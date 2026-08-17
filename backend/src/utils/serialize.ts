@@ -1,5 +1,4 @@
 import { Prisma } from "@prisma/client";
-import { HttpStatus } from "../types";
 
 /**
  * Deep-serializes Prisma result objects so they are JSON-safe:

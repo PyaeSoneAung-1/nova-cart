@@ -1,5 +1,4 @@
 import { prisma } from "../config/prisma";
-import { serializeData } from "../utils/serialize";
 
 /** Revenue = sum of order totals for orders that were actually paid. */
 function revenueWhere() {
@@ -20,7 +19,6 @@ export const statsService = {
       totalCustomers,
       totalProducts,
       lowStock,
-      ratingAgg,
     ] = await Promise.all([
       prisma.order.aggregate({
         where: revenueWhere(),
@@ -39,7 +37,6 @@ export const statsService = {
       prisma.user.count({ where: { role: "CUSTOMER" } }),
       prisma.product.count(),
       prisma.product.count({ where: { stock: { lte: 5 } } }),
-      prisma.order.aggregate({ _avg: { total: true }, _count: true }),
     ]);
 
     const revenue = revenueAgg._sum.total?.toNumber() ?? 0;

@@ -1,0 +1,9 @@
+node_modules
+dist
+tests
+postman
+.env
+.env.*
+!.env.example
+coverage
+*.log

@@ -24,6 +24,13 @@ router.get(
   validate(paginationQuerySchema, "query"),
   productController.adminList,
 );
+router.get(
+  "/admin/:id",
+  authenticate,
+  authorize("ADMIN"),
+  validate(idParamSchema, "params"),
+  productController.adminGet,
+);
 
 router.get("/:id", validate(idParamSchema, "params"), productController.getPublic);
 

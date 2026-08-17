@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import request from "supertest";
-import { app, registerUser, createProduct, createAdminTokens, createAddress, addToCart, createCoupon } from "./helpers";
-import { prisma } from "../src/config/prisma";
+import { app, registerUser, createProduct, createAdminTokens, createCoupon } from "./helpers";
+
 
 describe("Coupons API", () => {
   describe("POST /coupons/validate", () => {

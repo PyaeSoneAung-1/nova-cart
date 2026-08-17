@@ -1,4 +1,3 @@
-import { Prisma } from "@prisma/client";
 import { prisma } from "../config/prisma";
 import { ApiError } from "../utils/ApiError";
 import { hashPassword, verifyPassword } from "../utils/password";
@@ -18,10 +17,6 @@ const REFRESH_TOKEN_MAX_AGE_SECONDS = 7 * 24 * 60 * 60; // 7 days
 interface TokenPair {
   accessToken: string;
   refreshToken: string;
-}
-
-interface TokenPairWithUser<T> extends TokenPair {
-  user: T;
 }
 
 /** Issues an access token + a rotated refresh token (hashed copy stored). */
@@ -103,13 +98,14 @@ export const authService = {
   },
 
   async refresh(refreshToken: string): Promise<TokenPair> {
-    let payload;
+    let decoded: ReturnType<typeof verifyRefreshToken>;
     try {
-      payload = verifyRefreshToken(refreshToken);
+      decoded = verifyRefreshToken(refreshToken);
     } catch {
       throw ApiError.unauthorized("Invalid or expired refresh token");
     }
 
+    void decoded;
     const tokenHash = hashToken(refreshToken);
     const stored = await prisma.refreshToken.findUnique({ where: { tokenHash } });
 

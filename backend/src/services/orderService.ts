@@ -2,11 +2,7 @@ import { OrderStatus, PaymentMethod, PaymentStatus, Prisma } from "@prisma/clien
 import { prisma } from "../config/prisma";
 import { ApiError } from "../utils/ApiError";
 import { serializeData } from "../utils/serialize";
-import {
-  computeCartTotals,
-  cartService,
-  CartTotals,
-} from "./cartService";
+import { computeCartTotals, CartTotals } from "./cartService";
 import { validateCoupon } from "./couponService";
 import { generateOrderNumber, generateTransactionId, ORDER_STATUS_FLOW, CUSTOMER_CANCELLABLE } from "../utils/order";
 import { parsePagination, buildPaginationMeta } from "../utils/pagination";
