@@ -6,7 +6,8 @@
     },
     "backend": {
       "root": "backend",
-      "framework": "express"
+      "framework": "express",
+      "buildCommand": "npx prisma generate"
     }
   },
   "rewrites": [
