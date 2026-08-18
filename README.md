@@ -296,21 +296,26 @@ Production checklist: set `NODE_ENV=production`, real JWT secrets, `CLIENT_URL`,
 `COOKIE_SECURE=true`, `DATABASE_URL` of the managed DB, run
 `npm run db:deploy`, and `npm run build` in both apps.
 
-### Deploy on Vercel (serverless)
+### Deploy on Vercel (Services — single project, single domain)
 
-This repo is a monorepo, so it maps to **two Vercel projects**:
+This repo is a monorepo with two apps. Vercel's **Services** feature deploys
+both in **one project** on one domain via [`vercel.json`](vercel.json):
 
-1. **API** (`backend/`) — runs Express as a serverless function via
-   [`backend/api/index.ts`](backend/api/index.ts) +
-   [`backend/vercel.json`](backend/vercel.json).
-   - Root directory: `backend`
-   - Environment variables: `DATABASE_URL` (pooled URL),
-     `DIRECT_URL` (non-pooled URL, used by Prisma migrations),
-     `JWT_ACCESS_SECRET`, `JWT_REFRESH_SECRET`, `CLIENT_URL` (frontend origin),
-     `COOKIE_SECURE=true`, `MOCK_EMAIL=true`
-2. **Storefront** (`frontend/`) — standard Next.js app.
-   - Root directory: `frontend`
-   - Environment variables: `NEXT_PUBLIC_API_URL=https://<your-api>.vercel.app/api/v1`
+- `frontend/` — Next.js storefront at `/`
+- `backend/` — Express API at `/api/v1/*` (serverless entry: `backend/api/index.ts`)
+
+Project-level environment variables:
+
+```
+DATABASE_URL=postgresql://<user>:<pass>@<host>-pooler.<region>.aws.neon.tech/neondb?sslmode=require&pgbouncer=true
+DIRECT_URL=postgresql://<user>:<pass>@<host>.<region>.aws.neon.tech/neondb?sslmode=require
+JWT_ACCESS_SECRET=<long-random-string>
+JWT_REFRESH_SECRET=<long-random-string>
+CLIENT_URL=https://<your-project>.vercel.app
+COOKIE_SECURE=true
+MOCK_EMAIL=true
+NEXT_PUBLIC_API_URL=https://<your-project>.vercel.app/api/v1
+```
 
 Database: create a free **Neon** Postgres project and use its **pooled**
 connection string for `DATABASE_URL` (the `-pooler` host) with the **direct**
