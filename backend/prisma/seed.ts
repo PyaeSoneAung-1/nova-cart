@@ -18,30 +18,14 @@ export const DEMO_ACCOUNTS = {
   customer2: { name: "Ko Aung", email: "aung@example.com", password: "Customer@1234" },
 };
 
-/** Deterministic SVG placeholder image (gradient + monogram) as a data URI. */
-function productImage(name: string, seed: string): string {
-  const palettes = [
-    ["#6d28d9", "#a855f7"],
-    ["#0f766e", "#2dd4bf"],
-    ["#b45309", "#f59e0b"],
-    ["#be123c", "#fb7185"],
-    ["#1d4ed8", "#60a5fa"],
-    ["#166534", "#4ade80"],
-    ["#7c2d12", "#fb923c"],
-    ["#581c87", "#c084fc"],
-  ];
-  let h = 0;
-  for (const ch of seed) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
-  const [c1, c2] = palettes[h % palettes.length]!;
-  const initials = name
-    .split(" ")
-    .map((w) => w[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase();
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="800" height="800" viewBox="0 0 800 800"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="${c1}"/><stop offset="100%" stop-color="${c2}"/></linearGradient></defs><rect width="800" height="800" fill="url(#g)"/><circle cx="400" cy="320" r="150" fill="rgba(255,255,255,0.12)"/><circle cx="400" cy="320" r="95" fill="rgba(255,255,255,0.10)"/><text x="400" y="360" font-family="Arial, sans-serif" font-size="120" font-weight="bold" fill="rgba(255,255,255,0.92)" text-anchor="middle">${initials}</text><text x="400" y="520" font-family="Arial, sans-serif" font-size="34" fill="rgba(255,255,255,0.75)" text-anchor="middle">${name.slice(0, 22)}</text></svg>`;
-  return `data:image/svg+xml;base64,${Buffer.from(svg).toString("base64")}`;
-}
+/**
+ * Product / category / brand photos are served from the frontend's
+ * `public/images/` folder (see frontend/public/images). The seed stores
+ * frontend-relative paths, which resolve against the storefront origin.
+ */
+const IMG_PRODUCT = (slug: string) => `/images/products/${slug}.webp`;
+const IMG_CATEGORY = (slug: string) => `/images/categories/${slug}.webp`;
+const IMG_BRAND = (slug: string) => `/images/brands/${slug}.webp`;
 
 async function main() {
   console.log("🌱 Seeding NovaCart database...");
@@ -94,28 +78,30 @@ async function main() {
     const slug = c.name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
     const created = await prisma.category.upsert({
       where: { slug },
-      update: {},
-      create: { ...c, slug, image: productImage(c.name, c.name) },
+      // Also refresh the image/description on re-seed so old placeholder
+      // data never lingers in an existing database.
+      update: { image: IMG_CATEGORY(slug), description: c.description },
+      create: { ...c, slug, image: IMG_CATEGORY(slug) },
     });
     categories[c.name] = created;
   }
 
   // ── Brands ─────────────────────────────────────────────────────────────
   const brandsData = [
-    { name: "NovaTech", description: "Premium electronics and innovation" },
-    { name: "AeroGear", description: "Performance sportswear and outdoor gear" },
-    { name: "PureHome", description: "Thoughtful products for modern living" },
-    { name: "UrbanFit", description: "Everyday activewear that keeps up with you" },
-    { name: "Lumière", description: "Clean beauty and self-care essentials" },
-    { name: "PaperSoul", description: "Books and stationery for curious minds" },
+    { name: "NovaTech", description: "Premium electronics and innovation", image: "novatech" },
+    { name: "AeroGear", description: "Performance sportswear and outdoor gear", image: "aerogear" },
+    { name: "PureHome", description: "Thoughtful products for modern living", image: "purehome" },
+    { name: "UrbanFit", description: "Everyday activewear that keeps up with you", image: "urbanfit" },
+    { name: "Lumière", description: "Clean beauty and self-care essentials", image: "lumiere" },
+    { name: "PaperSoul", description: "Books and stationery for curious minds", image: "papersoul" },
   ];
   const brands: Record<string, { id: string }> = {};
   for (const b of brandsData) {
     const slug = b.name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
     const created = await prisma.brand.upsert({
       where: { slug },
-      update: {},
-      create: { ...b, slug, image: productImage(b.name, b.name) },
+      update: { image: IMG_BRAND(b.image), description: b.description },
+      create: { ...b, slug, image: IMG_BRAND(b.image) },
     });
     brands[b.name] = created;
   }
@@ -137,9 +123,9 @@ async function main() {
     { name: "Aurora Wireless Headphones", category: "Electronics", brand: "NovaTech", price: 129, discountPrice: 99, stock: 40, description: "Immersive over-ear wireless headphones with active noise cancellation, 40-hour battery life and plush memory-foam ear cushions." },
     { name: "Pulse Smartwatch Series 5", category: "Electronics", brand: "NovaTech", price: 199, discountPrice: 159, stock: 25, description: "Track workouts, sleep and heart rate with a bright AMOLED display, GPS and 7-day battery life." },
     { name: "Echo Portable Bluetooth Speaker", category: "Electronics", brand: "NovaTech", price: 59, stock: 60, description: "Pocket-sized speaker with surprisingly big sound, IPX7 waterproofing and 12 hours of playtime." },
-    { name: "Nimbus Mechanical Keyboard", category: "Electronics", brand: "NovaTech", price: 89, discountPrice: 69, stock: 15, description: "Hot-swappable mechanical keyboard with gasket mount, RGB backlight and PBT keycaps." },
+    { name: "Nimbus Mechanical Keyboard", category: "Electronics", brand: "NovaTech", price: 89, discountPrice: 69, stock: 4, description: "Hot-swappable mechanical keyboard with gasket mount, RGB backlight and PBT keycaps. Almost sold out!" },
     { name: "Orbit USB-C Power Bank 20K", category: "Electronics", brand: "NovaTech", price: 39, stock: 80, description: "20,000 mAh fast-charging power bank with dual USB-C ports and a slim aluminum body." },
-    { name: "Zen 4K Action Camera", category: "Electronics", brand: "AeroGear", price: 149, stock: 4, description: "Rugged 4K/60fps action camera with electronic image stabilization and a waterproof case." },
+    { name: "Zen 4K Action Camera", category: "Electronics", brand: "AeroGear", price: 149, stock: 0, description: "Rugged 4K/60fps action camera with electronic image stabilization and a waterproof case. Currently out of stock." },
     // Fashion
     { name: "Essential Cotton Tee", category: "Fashion", brand: "UrbanFit", price: 24, discountPrice: 17, stock: 120, variant: { size: "M", color: "Slate", price: 24, stock: 40 }, description: "Soft 100% organic cotton t-shirt with a relaxed fit that gets better with every wash." },
     { name: "Heritage Denim Jacket", category: "Fashion", brand: "UrbanFit", price: 89, discountPrice: 69, stock: 18, description: "Classic trucker jacket in durable 12oz selvedge denim. A wardrobe staple that ages beautifully." },
@@ -173,7 +159,7 @@ async function main() {
     skuIndex += 1;
     const slug = p.name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
     const existing = await prisma.product.findUnique({ where: { slug } });
-    const img = productImage(p.name, slug);
+    const img = IMG_PRODUCT(slug);
     const data = {
       name: p.name,
       slug,
@@ -190,6 +176,8 @@ async function main() {
 
     let product;
     if (existing) {
+      // Replace previous image rows so re-seeding never stacks duplicates.
+      await prisma.productImage.deleteMany({ where: { productId: existing.id } });
       product = await prisma.product.update({ where: { id: existing.id }, data });
     } else {
       product = await prisma.product.create({ data });
@@ -227,26 +215,10 @@ async function main() {
     });
   }
 
-  // ── Address ────────────────────────────────────────────────────────────
-  const address = await prisma.address.upsert({
-    where: { id: "seed-address-001" },
-    update: {},
-    create: {
-      id: "seed-address-001",
-      userId: customer.id,
-      label: "Home",
-      recipientName: customer.name,
-      phone: "+95 9 123 456 789",
-      line1: "12, Pyay Road, Kamayut",
-      city: "Yangon",
-      state: "Yangon Region",
-      postalCode: "11041",
-      country: "Myanmar",
-      isDefault: true,
-    },
-  });
-
   // ── Reviews (from demo customer on a few products) ─────────────────────
+  // Remove the sample address older seed versions created — no address is
+  // seeded anymore, so accounts start with a clean address book.
+  await prisma.address.deleteMany({ where: { id: "seed-address-001" } });
   const reviewSeeds = [
     { productName: "Aurora Wireless Headphones", rating: 5, comment: "Noise cancellation is incredible for the price. Battery easily lasts a week of daily use." },
     { productName: "Essential Cotton Tee", rating: 4, comment: "Great soft fabric and the fit is exactly as described. Runs slightly large." },
@@ -271,9 +243,14 @@ async function main() {
   }
 
   // ── Sample orders (so the admin dashboard has real numbers) ────────────
+  // Deterministic + idempotent: any previous NC-DEMO-* orders are removed
+  // first, then recreated with fixed order numbers, so re-seeding never
+  // stacks duplicate demo orders or double-decrements stock.
+  await prisma.order.deleteMany({ where: { orderNumber: { startsWith: "NC-DEMO-" } } });
+
   const sampleOrder = async (
     user: { id: string },
-    addressId: string,
+    index: number,
     items: { name: string; sku: string; unitPrice: number; quantity: number }[],
     daysAgo: number,
     status: "PENDING" | "CONFIRMED" | "PROCESSING" | "SHIPPED" | "DELIVERED",
@@ -287,7 +264,7 @@ async function main() {
     const product = await prisma.product.findFirst({ where: { sku: items[0]!.sku } });
     if (!product) return;
 
-    const orderNumber = `NC-DEMO-${1000 + daysAgo}-${Math.floor(Math.random() * 900 + 100)}`;
+    const orderNumber = `NC-DEMO-${String(index).padStart(4, "0")}`;
     const exists = await prisma.order.findUnique({ where: { orderNumber } });
     if (exists) return;
 
@@ -318,6 +295,7 @@ async function main() {
             productId: product.id,
             name: i.name,
             sku: i.sku,
+            image: IMG_PRODUCT(i.name.toLowerCase().replace(/[^a-z0-9]+/g, "-")),
             unitPrice: i.unitPrice,
             quantity: i.quantity,
             total: i.unitPrice * i.quantity,
@@ -327,7 +305,7 @@ async function main() {
           create: {
             method: PaymentMethod.CARD,
             status: paid ? "PAID" : "PENDING",
-            transactionId: paid ? `PAY_DEMO_${daysAgo}_${Math.random().toString(36).slice(2, 8)}` : null,
+            transactionId: paid ? `PAY_DEMO_${String(index).padStart(4, "0")}` : null,
             amount: total,
             paidAt: paid ? new Date(Date.now() - daysAgo * 864e5) : null,
           },
@@ -356,12 +334,12 @@ async function main() {
   const p = async (name: string) => (await find(name))!;
 
   // Delivered / shipped / processing orders (paid → revenue)
-  await sampleOrder(customer, address.id, [{ name: "Aurora Wireless Headphones", sku: (await p("Aurora Wireless Headphones")).sku, unitPrice: 99, quantity: 1 }], 28, "DELIVERED");
-  await sampleOrder(customer, address.id, [{ name: "Essential Cotton Tee", sku: (await p("Essential Cotton Tee")).sku, unitPrice: 17, quantity: 2 }], 21, "DELIVERED");
-  await sampleOrder(customer, address.id, [{ name: "Vitamin C Serum 30ml", sku: (await p("Vitamin C Serum 30ml")).sku, unitPrice: 34, quantity: 1 }], 14, "SHIPPED");
-  await sampleOrder(customer, address.id, [{ name: "Insulated Water Bottle 1L", sku: (await p("Insulated Water Bottle 1L")).sku, unitPrice: 29, quantity: 1 }], 9, "PROCESSING");
-  await sampleOrder(customer2, address.id, [{ name: "Pulse Smartwatch Series 5", sku: (await p("Pulse Smartwatch Series 5")).sku, unitPrice: 159, quantity: 1 }], 6, "CONFIRMED");
-  await sampleOrder(customer2, address.id, [{ name: "Echo Portable Bluetooth Speaker", sku: (await p("Echo Portable Bluetooth Speaker")).sku, unitPrice: 59, quantity: 2 }], 2, "PENDING");
+  await sampleOrder(customer, 1, [{ name: "Aurora Wireless Headphones", sku: (await p("Aurora Wireless Headphones")).sku, unitPrice: 99, quantity: 1 }], 28, "DELIVERED");
+  await sampleOrder(customer, 2, [{ name: "Essential Cotton Tee", sku: (await p("Essential Cotton Tee")).sku, unitPrice: 17, quantity: 2 }], 21, "DELIVERED");
+  await sampleOrder(customer, 3, [{ name: "Vitamin C Serum 30ml", sku: (await p("Vitamin C Serum 30ml")).sku, unitPrice: 34, quantity: 1 }], 14, "SHIPPED");
+  await sampleOrder(customer, 4, [{ name: "Insulated Water Bottle 1L", sku: (await p("Insulated Water Bottle 1L")).sku, unitPrice: 29, quantity: 1 }], 9, "PROCESSING");
+  await sampleOrder(customer2, 5, [{ name: "Pulse Smartwatch Series 5", sku: (await p("Pulse Smartwatch Series 5")).sku, unitPrice: 159, quantity: 1 }], 6, "CONFIRMED");
+  await sampleOrder(customer2, 6, [{ name: "Echo Portable Bluetooth Speaker", sku: (await p("Echo Portable Bluetooth Speaker")).sku, unitPrice: 59, quantity: 2 }], 2, "PENDING");
 
   void head; void tee; void serum; void bottle; void watch; void speaker; void book; void mat; void lamp;
 

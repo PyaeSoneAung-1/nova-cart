@@ -2,6 +2,8 @@ import Link from "next/link";
 import { ArrowRight, Sparkles, Truck, ShieldCheck, RotateCcw, BadgePercent } from "lucide-react";
 import { ProductGrid } from "@/components/product/ProductGrid";
 import { Button } from "@/components/ui/button";
+import { HomeCta } from "@/components/home/HomeCta";
+import { CategoryCard } from "@/components/home/CategoryCard";
 import { API_URL } from "@/lib/api";
 import type { Category, Paginated, Product } from "@/lib/types";
 
@@ -133,27 +135,9 @@ export default async function HomePage() {
               </Button>
             </div>
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
-              {activeCategories.map((category, i) => {
-                const hue = (i * 47) % 360;
-                return (
-                  <Link
-                    key={category.id}
-                    href={`/products?category=${category.slug}`}
-                    className="group flex flex-col items-center gap-3 rounded-xl border bg-card p-5 text-center transition-all hover:-translate-y-0.5 hover:shadow-md"
-                  >
-                    <span
-                      className="flex h-14 w-14 items-center justify-center rounded-full text-lg font-bold text-white"
-                      style={{ background: `linear-gradient(135deg, hsl(${hue} 70% 45%), hsl(${(hue + 40) % 360} 70% 60%))` }}
-                    >
-                      {category.name.slice(0, 2).toUpperCase()}
-                    </span>
-                    <span className="text-sm font-medium leading-tight">{category.name}</span>
-                    <span className="text-xs text-muted-foreground">
-                      {category._count?.products ?? 0} products
-                    </span>
-                  </Link>
-                );
-              })}
+              {activeCategories.map((category, i) => (
+                <CategoryCard key={category.id} category={category} hue={(i * 47) % 360} />
+              ))}
             </div>
           </div>
         </section>
@@ -223,22 +207,7 @@ export default async function HomePage() {
       </section>
 
       {/* ── CTA ──────────────────────────────────────────────────────────── */}
-      <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6">
-        <div className="flex flex-col items-center gap-4 rounded-2xl border bg-gradient-to-br from-primary/10 via-background to-background px-6 py-14 text-center">
-          <h2 className="text-2xl font-bold tracking-tight sm:text-3xl">Ready to shop?</h2>
-          <p className="max-w-md text-muted-foreground">
-            Create an account to save items, track orders and enjoy member-only coupons.
-          </p>
-          <div className="mt-2 flex flex-wrap justify-center gap-3">
-            <Button asChild size="lg" className="rounded-full px-8">
-              <Link href="/register">Create account</Link>
-            </Button>
-            <Button asChild size="lg" variant="outline" className="rounded-full px-8">
-              <Link href="/products">Browse products</Link>
-            </Button>
-          </div>
-        </div>
-      </section>
+      <HomeCta />
     </div>
   );
 }

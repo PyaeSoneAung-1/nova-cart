@@ -139,6 +139,28 @@ npm run db:migrate       # apply Prisma migrations
 npm run db:seed          # demo data + demo accounts
 ```
 
+> 💡 **Product photos** ship with the storefront in `frontend/public/images/`
+> (products, categories, brands) and the seed references them via
+> `/images/...` paths. Re-run `npm run db:seed` anytime to refresh the demo
+> data — product, category and brand images are refreshed (not duplicated) and
+> demo orders are deterministic (`NC-DEMO-0001…0006`), so the admin dashboard
+> always shows the same baseline numbers.
+>
+> Notes on the demo data: the **Zen 4K Action Camera is seeded out of stock**
+> (and a couple of items low-stock) so the storefront's out-of-stock state is
+> visible; no sample **address** is created anymore — add your own from
+> *Account → Addresses*.
+
+### Clean up your test data
+
+If you registered an account and played around (orders, cart, wishlist,
+addresses, reviews), wipe just that account's data — the account stays:
+
+```bash
+# Adjust the name/email in backend/scripts/cleanup.sql first if needed
+psql -h localhost -U novacart -d novacart -f backend/scripts/cleanup.sql
+```
+
 ### 3. Run
 
 ```bash
@@ -266,13 +288,39 @@ requirements):
 
 ```
 Next.js  → Vercel / any Node host       (NEXT_PUBLIC_API_URL → API)
-Express  → Render / Railway / a VPS     (PORT, DATABASE_URL, JWT secrets…)
+Express  → Vercel serverless / Render / Railway / a VPS
 Postgres → Neon / Supabase / RDS / managed PostgreSQL
 ```
 
 Production checklist: set `NODE_ENV=production`, real JWT secrets, `CLIENT_URL`,
 `COOKIE_SECURE=true`, `DATABASE_URL` of the managed DB, run
 `npm run db:deploy`, and `npm run build` in both apps.
+
+### Deploy on Vercel (serverless)
+
+This repo is a monorepo, so it maps to **two Vercel projects**:
+
+1. **API** (`backend/`) — runs Express as a serverless function via
+   [`backend/api/index.ts`](backend/api/index.ts) +
+   [`backend/vercel.json`](backend/vercel.json).
+   - Root directory: `backend`
+   - Environment variables: `DATABASE_URL` (pooled URL),
+     `DIRECT_URL` (non-pooled URL, used by Prisma migrations),
+     `JWT_ACCESS_SECRET`, `JWT_REFRESH_SECRET`, `CLIENT_URL` (frontend origin),
+     `COOKIE_SECURE=true`, `MOCK_EMAIL=true`
+2. **Storefront** (`frontend/`) — standard Next.js app.
+   - Root directory: `frontend`
+   - Environment variables: `NEXT_PUBLIC_API_URL=https://<your-api>.vercel.app/api/v1`
+
+Database: create a free **Neon** Postgres project and use its **pooled**
+connection string for `DATABASE_URL` (the `-pooler` host) with the **direct**
+connection string as `DIRECT_URL`. Run migrations + seed once:
+
+```bash
+cd backend
+DATABASE_URL="<direct-url>" npx prisma migrate deploy
+DATABASE_URL="<direct-url>" npm run db:seed
+```
 
 ## 🧹 Business Rules (server-side, never trusted from the client)
 

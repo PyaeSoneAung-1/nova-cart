@@ -17,13 +17,18 @@ function DropdownMenuPortal({ ...props }: MenuPrimitive.Portal.Props) {
 
 function DropdownMenuTrigger({
   asChild = false,
+  children,
   ...props
 }: MenuPrimitive.Trigger.Props & { asChild?: boolean }) {
   if (asChild) {
     return (
-      <Slot
-        data-slot="dropdown-menu-trigger"
-        {...(props as React.HTMLAttributes<HTMLElement>)}
+      <MenuPrimitive.Trigger
+        render={(renderProps) => (
+          <Slot data-slot="dropdown-menu-trigger" {...renderProps}>
+            {children}
+          </Slot>
+        )}
+        {...props}
       />
     )
   }
@@ -69,11 +74,13 @@ function DropdownMenuLabel({
   className,
   inset,
   ...props
-}: MenuPrimitive.GroupLabel.Props & {
+}: React.HTMLAttributes<HTMLDivElement> & {
   inset?: boolean
 }) {
+  // Render a plain element instead of Menu.GroupLabel so the label works
+  // without an explicit <Menu.Group> wrapper (Base UI requires one).
   return (
-    <MenuPrimitive.GroupLabel
+    <div
       data-slot="dropdown-menu-label"
       data-inset={inset}
       className={cn(

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { Suspense, useEffect } from "react";
 import { SWRConfig } from "swr";
 import { Toaster } from "sonner";
 import { Navbar } from "@/components/layout/Navbar";
@@ -42,7 +42,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
       }}
     >
       <div className="flex min-h-screen flex-col">
-        <Navbar />
+        <Suspense fallback={null}>
+          <Navbar />
+        </Suspense>
         <main className="flex-1">{children}</main>
         <Footer />
       </div>
