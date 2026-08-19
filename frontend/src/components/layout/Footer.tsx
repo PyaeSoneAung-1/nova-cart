@@ -14,7 +14,7 @@ export function Footer() {
           </Link>
           <p className="text-sm leading-relaxed text-zinc-400">
             A full-stack e-commerce platform — Next.js storefront, Express REST
-            API, PostgreSQL with Prisma. Built as a portfolio project.
+            API, PostgreSQL with Prisma.
           </p>
         </div>
 
@@ -54,7 +54,7 @@ export function Footer() {
         </div>
       </div>
       <div className="border-t border-white/10 py-5 text-center text-xs text-zinc-500">
-        © {new Date().getFullYear()} NovaCart — Full-Stack E-Commerce Platform. Demo project, no real payments.
+        © {new Date().getFullYear()} NovaCart — Full-Stack E-Commerce Platform.
       </div>
     </footer>
   );

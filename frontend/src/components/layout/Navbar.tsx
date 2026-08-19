@@ -33,7 +33,7 @@ import { cn } from "@/lib/utils";
 const CATEGORY_LINKS = [
   { label: "Electronics", href: "/products?category=electronics" },
   { label: "Fashion", href: "/products?category=fashion" },
-  { label: "Home", href: "/products?category=home-living" },
+  { label: "Home & Living", href: "/products?category=home-living" },
   { label: "Sports", href: "/products?category=sports-outdoors" },
   { label: "Beauty", href: "/products?category=beauty-care" },
   { label: "Books", href: "/products?category=books-media" },
