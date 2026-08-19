@@ -2,7 +2,10 @@
 // PostgreSQL data model for the full-stack e-commerce platform.
 
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
+  // Bundle engine binaries for all likely serverless platforms so the
+  // deployed function works regardless of the build/runtime OS or arch.
+  binaryTargets = ["native", "rhel-openssl-3.0.x", "debian-openssl-3.0.x", "linux-musl-openssl-3.0.x", "linux-musl-arm64-openssl-3.0.x"]
 }
 
 datasource db {

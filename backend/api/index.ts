@@ -1,33 +1,40 @@
 /**
  * Vercel serverless entry point.
  *
- * Re-exports the Express app so it can run as a serverless function
- * (root vercel.json routes /api/* here). `server.ts` is used for local
- * development / long-running servers (Docker, Render, etc.).
+ * Lazy boot: the Express app (and its Prisma client) is built on first
+ * request inside a try/catch, so any boot-time failure (missing engine
+ * binary, env problem, …) is returned as a JSON 500 with the real message
+ * instead of an opaque FUNCTION_INVOCATION_FAILED.
  *
- * Boot errors (e.g. Prisma client init) are caught and returned as a JSON
- * 500 with the real message instead of a generic FUNCTION_INVOCATION_FAILED,
- * which makes serverless failures debuggable from the endpoint itself.
+ * `server.ts` is used for local development / long-running servers.
  */
-import express from "express";
-import { createApp } from "../src/app";
+import type { IncomingMessage, ServerResponse } from "http";
 
-let app: ReturnType<typeof createApp>;
+let app: ((req: IncomingMessage, res: ServerResponse) => void) | null = null;
+let bootError: { message: string; stack?: string } | null = null;
 
-try {
-  app = createApp();
-} catch (err) {
-  // eslint-disable-next-line no-console
-  console.error("NOVACART BOOT ERROR:", err);
-  const fallback = express();
-  fallback.use((_req: express.Request, res: express.Response) => {
-    res.status(500).json({
-      error: "BOOT_FAILED",
+async function boot() {
+  if (app || bootError) return;
+  try {
+    const mod = await import("../src/app");
+    app = mod.createApp();
+  } catch (err) {
+    bootError = {
       message: err instanceof Error ? err.message : String(err),
       stack: err instanceof Error ? err.stack : undefined,
-    });
-  });
-  app = fallback;
+    };
+    // eslint-disable-next-line no-console
+    console.error("NOVACART BOOT ERROR:", bootError);
+  }
 }
 
-export default app;
+export default async function handler(req: IncomingMessage, res: ServerResponse) {
+  await boot();
+  if (bootError || !app) {
+    res.statusCode = 500;
+    res.setHeader("Content-Type", "application/json");
+    res.end(JSON.stringify({ error: "BOOT_FAILED", bootError }));
+    return;
+  }
+  app(req, res);
+}
