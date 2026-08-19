@@ -20,4 +20,6 @@ COPY --from=build /app/dist ./dist
 COPY --from=build /app/prisma ./prisma
 COPY --from=build /app/package.json ./
 EXPOSE 4000
-CMD ["sh", "-c", "npx prisma migrate deploy && node dist/src/server.js"]
+# Migrations are applied during deployment (see README "Deployment"); running
+# them on every cold start made container init exceed Vercel's start timeout.
+CMD ["node", "dist/src/server.js"]
