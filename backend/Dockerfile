@@ -4,6 +4,7 @@ WORKDIR /app
 
 FROM base AS deps
 COPY package.json package-lock.json .npmrc ./
+COPY prisma ./prisma
 RUN npm ci --no-audit --no-fund
 
 FROM base AS build
