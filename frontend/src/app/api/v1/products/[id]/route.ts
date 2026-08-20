@@ -1,10 +1,14 @@
 import type { NextRequest } from "next/server";
-import { proxyCatalogGet } from "@/lib/proxy-catalog";
+import { proxyApi } from "@/lib/proxy-catalog";
 
-export async function GET(
+async function handler(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params;
-  return proxyCatalogGet(req, `/api/v1/products/${encodeURIComponent(id)}`);
+  return proxyApi(req, `/api/v1/products/${encodeURIComponent(id)}`);
 }
+
+export const GET = handler;
+export const PATCH = handler;
+export const DELETE = handler;

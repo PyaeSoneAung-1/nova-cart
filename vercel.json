@@ -13,24 +13,11 @@
     }
   },
   "rewrites": [
-    {
-      "source": "/api/v1/products(.*)",
-      "has": [{ "type": "method", "value": "GET" }],
-      "missing": [{ "type": "header", "key": "authorization" }],
-      "destination": { "service": "frontend" }
-    },
-    {
-      "source": "/api/v1/categories(.*)",
-      "has": [{ "type": "method", "value": "GET" }],
-      "missing": [{ "type": "header", "key": "authorization" }],
-      "destination": { "service": "frontend" }
-    },
-    {
-      "source": "/api/v1/brands(.*)",
-      "has": [{ "type": "method", "value": "GET" }],
-      "missing": [{ "type": "header", "key": "authorization" }],
-      "destination": { "service": "frontend" }
-    },
+    { "source": "/api/v1/products", "destination": { "service": "frontend" } },
+    { "source": "/api/v1/products/:id", "destination": { "service": "frontend" } },
+    { "source": "/api/v1/products/:id/reviews", "destination": { "service": "frontend" } },
+    { "source": "/api/v1/categories", "destination": { "service": "frontend" } },
+    { "source": "/api/v1/brands", "destination": { "service": "frontend" } },
     { "source": "/api/(.*)", "destination": { "service": "backend" } },
     { "source": "/(.*)", "destination": { "service": "frontend" } }
   ]

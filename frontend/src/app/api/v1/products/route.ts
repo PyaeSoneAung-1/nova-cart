@@ -1,6 +1,9 @@
 import type { NextRequest } from "next/server";
-import { proxyCatalogGet } from "@/lib/proxy-catalog";
+import { proxyApi } from "@/lib/proxy-catalog";
 
-export async function GET(req: NextRequest) {
-  return proxyCatalogGet(req, "/api/v1/products");
+function handler(req: NextRequest) {
+  return proxyApi(req, "/api/v1/products");
 }
+
+export const GET = handler;
+export const POST = handler;
