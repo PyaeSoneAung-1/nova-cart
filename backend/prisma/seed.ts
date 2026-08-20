@@ -37,7 +37,7 @@ async function main() {
     create: {
       ...DEMO_ACCOUNTS.admin,
       role: Role.ADMIN,
-      password: await bcrypt.hash(DEMO_ACCOUNTS.admin.password, 12),
+      password: await bcrypt.hash(DEMO_ACCOUNTS.admin.password, 10),
     },
   });
 
@@ -46,7 +46,7 @@ async function main() {
     update: {},
     create: {
       ...DEMO_ACCOUNTS.customer,
-      password: await bcrypt.hash(DEMO_ACCOUNTS.customer.password, 12),
+      password: await bcrypt.hash(DEMO_ACCOUNTS.customer.password, 10),
     },
   });
 
@@ -55,7 +55,7 @@ async function main() {
     update: {},
     create: {
       ...DEMO_ACCOUNTS.customer2,
-      password: await bcrypt.hash(DEMO_ACCOUNTS.customer2.password, 12),
+      password: await bcrypt.hash(DEMO_ACCOUNTS.customer2.password, 10),
     },
   });
 
