@@ -12,34 +12,5 @@
   "rewrites": [
     { "source": "/api/(.*)", "destination": { "service": "backend" } },
     { "source": "/(.*)", "destination": { "service": "frontend" } }
-  ],
-  "headers": [
-    {
-      "source": "/api/v1/products(.*)",
-      "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "public, s-maxage=300, stale-while-revalidate=60"
-        }
-      ]
-    },
-    {
-      "source": "/api/v1/categories(.*)",
-      "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "public, s-maxage=600, stale-while-revalidate=60"
-        }
-      ]
-    },
-    {
-      "source": "/api/v1/brands(.*)",
-      "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "public, s-maxage=600, stale-while-revalidate=60"
-        }
-      ]
-    }
   ]
 }
