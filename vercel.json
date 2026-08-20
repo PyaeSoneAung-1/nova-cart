@@ -12,11 +12,5 @@
   "rewrites": [
     { "source": "/api/(.*)", "destination": { "service": "backend" } },
     { "source": "/(.*)", "destination": { "service": "frontend" } }
-  ],
-  "crons": [
-    {
-      "path": "/api/v1/health",
-      "schedule": "*/5 * * * *"
-    }
   ]
 }
