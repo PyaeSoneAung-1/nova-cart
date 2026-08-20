@@ -10,7 +10,7 @@ import type { Category, Paginated, Product } from "@/lib/types";
 async function fetchProducts(query: string): Promise<Product[]> {
   try {
     const res = await fetch(`${API_URL}/products?limit=8&${query}`, {
-      cache: "no-store",
+      next: { revalidate: 300 },
     });
     if (!res.ok) return [];
     const body = await res.json();
@@ -22,7 +22,7 @@ async function fetchProducts(query: string): Promise<Product[]> {
 
 async function fetchCategories(): Promise<Category[]> {
   try {
-    const res = await fetch(`${API_URL}/categories`, { cache: "no-store" });
+    const res = await fetch(`${API_URL}/categories`, { next: { revalidate: 600 } });
     if (!res.ok) return [];
     const body = await res.json();
     return body.data as Category[];

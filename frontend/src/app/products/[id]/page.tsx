@@ -6,7 +6,7 @@ import { ProductGrid } from "@/components/product/ProductGrid";
 
 async function getProduct(slug: string): Promise<Product | null> {
   try {
-    const res = await fetch(`${API_URL}/products/${slug}`, { cache: "no-store" });
+    const res = await fetch(`${API_URL}/products/${slug}`, { next: { revalidate: 300 } });
     if (!res.ok) return null;
     const body = await res.json();
     return body.data as Product;

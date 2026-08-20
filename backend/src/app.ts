@@ -1,4 +1,4 @@
-import express, { Application } from "express";
+import express, { Application, type NextFunction, type Request, type Response } from "express";
 import helmet from "helmet";
 import cors from "cors";
 import cookieParser from "cookie-parser";
@@ -6,6 +6,21 @@ import apiRoutes from "./routes";
 import { errorHandler, notFoundHandler } from "./middlewares/errorHandler";
 import { limiter } from "./middlewares/rateLimiter";
 import { env } from "./config/env";
+
+/** Edge cache public catalog GETs — product/category/brand data barely
+ * changes, so Vercel's CDN can serve these without touching the container
+ * (which is what made every page load pay a cold start). */
+function cachePublicGet(maxAge: number) {
+  return (req: Request, res: Response, next: NextFunction) => {
+    if (req.method === "GET") {
+      res.set(
+        "Cache-Control",
+        `public, s-maxage=${maxAge}, stale-while-revalidate=60`,
+      );
+    }
+    next();
+  };
+}
 
 /** Builds and configures the Express application. */
 export function createApp(): Application {
@@ -43,6 +58,12 @@ export function createApp(): Application {
       data: { version: "1.0.0", docs: "/api/v1/health" },
     });
   });
+
+  // Public catalog GETs are CDN-cacheable (5–10 min). Auth/user routes are
+  // deliberately NOT cached.
+  app.use("/api/v1/products", cachePublicGet(300));
+  app.use("/api/v1/categories", cachePublicGet(600));
+  app.use("/api/v1/brands", cachePublicGet(600));
 
   app.use("/api/v1", apiRoutes);
 
